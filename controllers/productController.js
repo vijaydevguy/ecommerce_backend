@@ -86,10 +86,31 @@ const listProduct = async (req, res) => {
 };
 
 // remove product
-const removeProduct = async (req, res) => {};
+const removeProduct = async (req, res) => {
+  try {
+    const id = req.body.id;
+    const product = await productModal.findByIdAndDelete(id);
+    res.json({
+      success: true,
+      message: `Successfully deleted product ${id} ${product.name}`,
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
 
 // single product
 
-const singleProduct = async (req, res) => {};
+const singleProduct = async (req, res) => {
+  try {
+    const  {productId}  = req.body;
+    const product = await productModal.findById(productId); // Added await here
+    res.json({ success: true, product });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
 
 export { singleProduct, removeProduct, listProduct, addProduct };
