@@ -7,11 +7,14 @@ import {
   addProduct,
 } from "../controllers/productController.js";
 import upload from "../middleware/multer.js";
+import adminAuth from "../middleware/adminAuth.js";
 
 const productRouter = express.Router();
 
 productRouter.post(
   "/add",
+  //this added ai i am not did this
+  adminAuth,
   //middle ware to handle images multer
   upload.fields([
     {
@@ -33,8 +36,11 @@ productRouter.post(
   ]),
   addProduct
 );
-productRouter.post("/remove", removeProduct);
-productRouter.get("/list", listProduct);
+
+//adminAuth is middle it will check admin pass and email with jwt
+
+productRouter.post("/remove", adminAuth, removeProduct);
+productRouter.get("/list", adminAuth, listProduct);
 productRouter.get("/single", singleProduct);
 
 export default productRouter;
