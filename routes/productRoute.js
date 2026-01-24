@@ -40,7 +40,7 @@ productRouter.post(
 //adminAuth is middle it will check admin pass and email with jwt
 
 productRouter.post("/remove", adminAuth, removeProduct);
-productRouter.get("/list", adminAuth, listProduct);
+productRouter.get("/list",  listProduct);
 productRouter.get("/single", singleProduct);
 
 export default productRouter;
