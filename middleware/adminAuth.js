@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 
 const adminAuth = async (req, res, next) => {
+  console.log("headers", req.headers)
   try {
     const { token } = req.headers;
-
     if (!token) {
       return res.json({
         success: false,
@@ -16,7 +16,7 @@ const adminAuth = async (req, res, next) => {
     if (token_decode !== process.env.ADMIN_EMAIL + process.env.ADMIN_PASSWORD) {
       return res.json({
         success: false,
-        message: "Not Authorized Login Again",
+        message: "Not matching token & Authorized Login Again",
       });
     }
 

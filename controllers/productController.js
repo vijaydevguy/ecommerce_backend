@@ -14,30 +14,14 @@ const addProduct = async (req, res) => {
       bestseller,
     } = req.body;
 
-    // Validation for required fields
-    if (!name || !description || !price || !category || !subCategory || !sizes) {
-      return res.json({
-        success: false,
-        message: "All fields are required (name, description, price, category, subCategory, sizes)",
-      });
-    }
-
-    const image1 = req.files?.image1 && req.files.image1[0];
-    const image2 = req.files?.image2 && req.files.image2[0];
-    const image3 = req.files?.image3 && req.files.image3[0];
-    const image4 = req.files?.image4 && req.files.image4[0];
+    const image1 = req.files.image1 && req.files.image1[0];
+    const image2 = req.files.image2 && req.files.image2[0];
+    const image3 = req.files.image3 && req.files.image3[0];
+    const image4 = req.files.image4 && req.files.image4[0];
 
     const images = [image1, image2, image3, image4].filter(
       (item) => item != undefined,
     );
-
-    // Validate at least one image is provided
-    if (images.length === 0) {
-      return res.json({
-        success: false,
-        message: "At least one image is required",
-      });
-    }
 
     console.log(
       name,
@@ -59,24 +43,13 @@ const addProduct = async (req, res) => {
       }),
     );
 
-    // Parse sizes with error handling
-    let parsedSizes;
-    try {
-      parsedSizes = JSON.parse(sizes);
-    } catch (parseError) {
-      return res.json({
-        success: false,
-        message: "Invalid sizes format. Must be valid JSON array",
-      });
-    }
-
     const productData = {
       name,
       description,
       price: Number(price),
       category,
       subCategory,
-      sizes: parsedSizes,
+      sizes: JSON.parse(sizes),
       bestSeller: bestseller === "true" ? true : false,
       image: imagesUrl,
       date: Date.now(),
@@ -100,9 +73,9 @@ const addProduct = async (req, res) => {
 
 // list product
 const listProduct = async (req, res) => {
+  // console.log(req.headers);
   try {
     const products = await productModal.find({});
-
     console.log(products);
 
     res.json({ success: true, products });

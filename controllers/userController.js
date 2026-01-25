@@ -6,7 +6,7 @@ import userModel from "../modals/userModel.js";
 
 //create token
 const createToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET);
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
 //Route for user login
@@ -76,7 +76,7 @@ const registerUser = async (req, res) => {
 
     const user = await newUser.save();
 
-    const token = createToken(createToken(user._id));
+    const token = createToken(user._id);
     res.json({ success: true, token });
   } catch (error) {
     console.log("registerUser error", error);
@@ -95,8 +95,7 @@ const adminLogin = async (req, res) => {
     ) {
       const token = jwt.sign(email + password, process.env.JWT_SECRET);
       res.json({ success: true, token });
-    } 
-    else {
+    } else {
       res.json({ success: false, message: "Invalid credentials" });
     }
   } catch (error) {
