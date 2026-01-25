@@ -5,21 +5,23 @@ const addToCart = async (req, res) => {
   try {
     const { userId, itemId, size } = req.body;
     const userData = await userModel.findById(userId);
-    const cartData = await userData.cartData;
-    console.log("userData",userData)
-    console.log("getting data", userId,itemId,size)
-    if (cartData[itemId]) {
-      if (cartData[itemId][size]) {
-        cartData[itemId][size] += 1;
+    const cart = (await userData.cart) || {};
+
+    console.log("userData", userData);
+    console.log("getting data", userId, itemId, size);
+
+    if (cart[itemId]) {
+      if (cart[itemId][size]) {
+        cart[itemId][size] += 1;
       } else {
-        cartData[itemId][size] = 1;
+        cart[itemId][size] = 1;
       }
     } else {
-      cartData[itemId] = {};
-      cartData[itemId][size] = 1;
+      cart[itemId] = {};
+      cart[itemId][size] = 1;
     }
 
-    await userModel.findByIdAndUpdate(userId, { cartData });
+    await userModel.findByIdAndUpdate(userId, { cart });
     res.json({ success: true, message: "Added to cart" });
   } catch (error) {
     console.log(error);
@@ -33,11 +35,11 @@ const updateCart = async (req, res) => {
     const { userId, itemId, size, quantity } = req.body;
 
     const userData = await userModel.findById(userId);
-    const cartData = await userData.cartData;
+    const cart = await userData.cart;
 
-    cartData[itemId][size] = quantity;
+    cart[itemId][size] = quantity;
 
-    await userModel.findByIdAndUpdate(userId, { cartData });
+    await userModel.findByIdAndUpdate(userId, { cart });
     res.json({ success: true, message: "Cart updated" });
   } catch (error) {
     console.log(error);
@@ -50,9 +52,13 @@ const getUserCart = async (req, res) => {
   try {
     const { userId } = req.body;
     const userData = await userModel.findById(userId);
-    const cartData = await userData.cartData;
+    const cart = await userData.cart;
 
-    res.json({ success: true, cartData, message: "Cart details fetched" });
+    console.log("userData form get userCart", userData);
+    console.log("userId form get userCart", userId);
+    console.log("userId form get Cart", cart);
+
+    res.json({ success: true, cart, message: "Cart details fetched" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
