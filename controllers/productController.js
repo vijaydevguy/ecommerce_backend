@@ -56,7 +56,7 @@ const addProduct = async (req, res) => {
     };
     console.log(productData);
 
-    console.log(imagesUrl);
+    console.log("images url",imagesUrl);
 
     // console.log(image1, image2, image3, image4);
     console.log(images);

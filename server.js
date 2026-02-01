@@ -6,6 +6,7 @@ import connectCloudinary from "./config/cloudinary.js";
 import userRouter from "./routes/userRoute.js";
 import productRouter from "./routes/productRoute.js";
 import cartRouter from "./routes/cartRouter.js";
+import orderRouter from "./routes/orderRoute.js";
 
 //App Config
 const app = express();
@@ -17,17 +18,25 @@ connectCloudinary();
 
 //middlewares
 app.use(express.json());
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization", "token"]
-}));
-
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://ecommerce-frontend-five-orpin.vercel.app/",
+    ],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "token"],
+  }),
+);
 
 //api endpoints
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
+
+//orders endpoint
+app.use("/api/order", orderRouter);
 
 app.get("/", (req, res) => {
   res.send("API working");
