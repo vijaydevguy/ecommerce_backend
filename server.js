@@ -42,6 +42,12 @@ app.get("/", (req, res) => {
   res.send("API working");
 });
 
-app.listen(port, () => {
-  console.log("Server started on PORT: " + port);
-});
+// app.listen(port, () => {
+//   console.log("Server started on PORT: " + port);
+// });
+
+const port_val = Number(process.env.PORT) || 4000;
+if (Number.isNaN(Number(process.env.PORT))) {
+  console.warn("process.env.PORT is not a valid number; falling back to", port_val);
+}
+app.listen(port_val, () => console.log("Server started on PORT: " + port_val));
