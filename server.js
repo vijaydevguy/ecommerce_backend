@@ -23,10 +23,10 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://ecommerce-frontend-five-orpin.vercel.app",
+      "https://ecommerce-frontend-five-orpin.vercel.app/",
     ],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization", "token", "Accept"],
+    allowedHeaders: ["Content-Type", "Authorization", "token"],
   }),
 );
 
@@ -48,9 +48,6 @@ app.get("/", (req, res) => {
 
 const port_val = Number(process.env.PORT) || 4000;
 if (Number.isNaN(Number(process.env.PORT))) {
-  console.warn(
-    "process.env.PORT is not a valid number; falling back to",
-    port_val,
-  );
+  console.warn("process.env.PORT is not a valid number; falling back to", port_val);
 }
 app.listen(port_val, () => console.log("Server started on PORT: " + port_val));
