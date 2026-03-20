@@ -52,7 +52,6 @@
 // }
 // app.listen(port_val, () => console.log("Server started on PORT: " + port_val));
 
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv/config";
@@ -76,12 +75,13 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://ecommerce-frontend-five-orpin.vercel.app",
+      "*",
+      // "http://localhost:5173",
+      // "http://localhost:5174",
+      // "https://ecommerce-frontend-five-orpin.vercel.app",
     ],
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization", "token", "Accept"],
+    // credentials: true,
+    // allowedHeaders: ["Content-Type", "Authorization", "token", "Accept"],
   }),
 );
 
