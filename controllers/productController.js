@@ -71,14 +71,144 @@ const addProduct = async (req, res) => {
   }
 };
 
-// list product
+// list product with search, filter, sort, and pagination
 const listProduct = async (req, res) => {
-  // console.log(req.headers);
   try {
-    const products = await productModal.find({});
-    console.log(products);
+    const {
+      page = 1,
+      limit = 12,
+      search = "",
+      category = "",
+      subCategory = "",
+      sort = "relavent",
+      bestseller,
+      bestSeller,
+      minPrice,
+      maxPrice,
+    } = req.query;
 
-    res.json({ success: true, products });
+    const filter = {};
+
+    // 1. Search filter: search name, description, category, subCategory
+    const searchTrimmed = String(search).trim();
+    if (searchTrimmed !== "") {
+      const searchRegex = new RegExp(searchTrimmed, "i");
+      filter.$or = [
+        { name: searchRegex },
+        { description: searchRegex },
+        { category: searchRegex },
+        { subCategory: searchRegex },
+      ];
+    }
+
+    // 2. Category filter: support single value, array, or comma-separated string
+    if (category) {
+      const catList = Array.isArray(category)
+        ? category
+        : String(category).split(",").map((c) => c.trim()).filter(Boolean);
+      if (catList.length > 0) {
+        filter.category = {
+          $in: catList.map((c) => new RegExp(`^${c}$`, "i")),
+        };
+      }
+    }
+
+    // 3. SubCategory filter: support single value, array, or comma-separated string
+    const subCatRaw = subCategory || req.query.subcategory;
+    if (subCatRaw) {
+      const subCatList = Array.isArray(subCatRaw)
+        ? subCatRaw
+        : String(subCatRaw).split(",").map((sc) => sc.trim()).filter(Boolean);
+      if (subCatList.length > 0) {
+        filter.subCategory = {
+          $in: subCatList.map((sc) => new RegExp(`^${sc}$`, "i")),
+        };
+      }
+    }
+
+    // 4. Bestseller filter
+    const isBestseller = bestseller !== undefined ? bestseller : bestSeller;
+    if (isBestseller !== undefined) {
+      filter.bestSeller = isBestseller === "true" || isBestseller === true;
+    }
+
+    // 5. Price range filter
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      filter.price = {};
+      if (minPrice !== undefined && !isNaN(Number(minPrice))) {
+        filter.price.$gte = Number(minPrice);
+      }
+      if (maxPrice !== undefined && !isNaN(Number(maxPrice))) {
+        filter.price.$lte = Number(maxPrice);
+      }
+    }
+
+    // 6. Sorting
+    let sortOptions = { date: -1 };
+    if (sort === "low-high") {
+      sortOptions = { price: 1 };
+    } else if (sort === "high-low") {
+      sortOptions = { price: -1 };
+    } else if (sort === "oldest") {
+      sortOptions = { date: 1 };
+    } else if (sort === "newest" || sort === "relavent") {
+      sortOptions = { date: -1 };
+    }
+
+    // 7. Total count matching filters
+    const totalProducts = await productModal.countDocuments(filter);
+
+    // If client asks for all products explicitly
+    if (String(limit).toLowerCase() === "all") {
+      const products = await productModal.find(filter).sort(sortOptions);
+      return res.json({
+        success: true,
+        products,
+        pagination: {
+          totalProducts,
+          totalPages: 1,
+          currentPage: 1,
+          limit: products.length,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+        totalProducts,
+        totalPages: 1,
+        currentPage: 1,
+        limit: products.length,
+      });
+    }
+
+    // Standard pagination calculation
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.max(1, parseInt(limit) || 12);
+    const skip = (pageNum - 1) * limitNum;
+    const totalPages = Math.ceil(totalProducts / limitNum) || 1;
+
+    const products = await productModal
+      .find(filter)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limitNum);
+
+    return res.json({
+      success: true,
+      products,
+      pagination: {
+        totalProducts,
+        totalPages,
+        currentPage: pageNum,
+        limit: limitNum,
+        hasNextPage: pageNum < totalPages,
+        hasPrevPage: pageNum > 1,
+      },
+      totalProducts,
+      totalPages,
+      currentPage: pageNum,
+      limit: limitNum,
+      hasNextPage: pageNum < totalPages,
+      hasPrevPage: pageNum > 1,
+    });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
