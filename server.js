@@ -74,12 +74,13 @@ connectCloudinary();
 app.use(express.json());
 app.use(
   cors({
-    origin: [
-      "*",
-      // "http://localhost:5173",
-      // "http://localhost:5174",
-      // "https://ecommerce-frontend-five-orpin.vercel.app",
-    ],
+    origin: "*"
+    //   [
+    //   "*",
+    //   // "http://localhost:5173",
+    //   // "http://localhost:5174",
+    //   // "https://ecommerce-frontend-five-orpin.vercel.app",
+    // ],
     // credentials: true,
     // allowedHeaders: ["Content-Type", "Authorization", "token", "Accept"],
   }),
