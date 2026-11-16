@@ -38,7 +38,7 @@ const placeOrderRazorpay = async (req, res) => {};
 //All orders data for admin panel with pagination, search, and status filter
 const allOrders = async (req, res) => {
   try {
-    const { page, limit, status, search } = req.query;
+    const { page, limit, status, search } = { ...req.query, ...req.body };
     const filter = {};
 
     // Filter by order status
