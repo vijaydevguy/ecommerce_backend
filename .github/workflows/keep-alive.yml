@@ -1,0 +1,17 @@
+name: Keep Backend and DB Alive
+
+on:
+  schedule:
+    # Runs every 14 minutes (Render free tier sleeps after 15 minutes of inactivity)
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  ping-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Backend and Database Health Endpoint
+        run: |
+          echo "Sending wake-up ping to backend and MongoDB..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" "https://ecommerce-backend-eiq9.onrender.com/api/health")
+          echo "$RESPONSE"
