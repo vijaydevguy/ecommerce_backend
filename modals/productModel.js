@@ -10,12 +10,15 @@ const productSchema = new mongoose.Schema({
   sizes: { type: Array, required: true },
   bestSeller: { type: Boolean },
   date: { type: Number, required: true },
+  isDemo: { type: Boolean, default: false },
+  expireAt: { type: Date, default: null },
 });
 
-//this will create everytime so we will 
-// const productModal = mongoose.model("product", productSchema);
+// TTL index: MongoDB automatically purges expired demo documents when expireAt <= current time
+// Only documents where expireAt is a valid Date will expire; null/missing values are ignored
+productSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
 
-const productModal = mongoose.models.product || mongoose.model("product", productSchema);
-
+const productModal =
+  mongoose.models.product || mongoose.model("product", productSchema);
 
 export default productModal;

@@ -43,6 +43,11 @@ const addProduct = async (req, res) => {
       }),
     );
 
+    const isDemo =
+      req.headers.isdemo === "true" ||
+      req.body.isDemo === "true" ||
+      req.body.isDemo === true;
+
     const productData = {
       name,
       description,
@@ -53,6 +58,8 @@ const addProduct = async (req, res) => {
       bestSeller: bestseller === "true" ? true : false,
       image: imagesUrl,
       date: Date.now(),
+      isDemo: Boolean(isDemo),
+      expireAt: isDemo ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null,
     };
     console.log(productData);
 
@@ -74,6 +81,15 @@ const addProduct = async (req, res) => {
 // list product with search, filter, sort, and pagination
 const listProduct = async (req, res) => {
   try {
+    // Lazy cleanup: purge any demo products whose 24-hour TTL has expired
+    try {
+      await productModal.deleteMany({
+        expireAt: { $ne: null, $lte: new Date() },
+      });
+    } catch (cleanupErr) {
+      // Non-blocking cleanup fallback
+    }
+
     const {
       page = 1,
       limit = 12,
@@ -218,11 +234,23 @@ const listProduct = async (req, res) => {
 // remove product
 const removeProduct = async (req, res) => {
   try {
+    const isDemo =
+      req.headers.isdemo === "true" ||
+      req.body.isDemo === "true" ||
+      req.body.isDemo === true;
+
+    if (isDemo) {
+      return res.json({
+        success: false,
+        message: "Product deletion is disabled in Demo Mode",
+      });
+    }
+
     const id = req.body.id;
     const product = await productModal.findByIdAndDelete(id);
     res.json({
       success: true,
-      message: `Successfully deleted product ${id} ${product.name}`,
+      message: `Successfully deleted product ${id} ${product?.name || ""}`,
     });
   } catch (error) {
     console.log(error);
